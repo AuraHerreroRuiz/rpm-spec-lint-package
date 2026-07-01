@@ -1,0 +1,7 @@
+src/__pycache__
+
+test/rpmbuild/SRPMS
+test/rpmbuild/RPMS
+test/rpmbuild/BUILD
+test/rpmbuild/SOURCES/**
+!test/rpmbuild/SOURCES/test-rpm.c

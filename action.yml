@@ -1,0 +1,27 @@
+name: 'Package RPM'
+description: 'Build and package RPMs from spec file'
+author: 'Aura Herrero Ruiz'
+
+inputs:
+  spec_file:
+    description: 'Path of the spec file to build'
+    required: true
+
+outputs:
+  source_rpm_path:
+    description: 'Path to Source RPM file'
+  source_rpm_dir_path:
+    description: 'Path to SRPMS directory'
+  source_rpm_name:
+    description: 'Name of Source RPM file'
+  rpm_dir_path:
+    description: 'Path to RPMS directory'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+
+branding:
+  icon: 'package'
+  color: 'red'
+
+
