@@ -10,9 +10,12 @@ if __name__ == "__main__":
 
     logger.Notice("Packaging rpm from spec file",file=specFileName)
     try:
-        # spec = package.Specfile(f"{workflow.workspacePath}/SPECS/{specFileName}")
+        logger.startLinesGroup("Linting")
         spec = package.Specfile(specFileName)
-        spec.lint()
+        errorNumber = spec.lint()
+        logger.endLinesGroup()
+        if errorNumber > 0:
+            logger.ErrorAndTerminate("More than one critical lint")
     except FileNotFoundError:
         logger.ErrorAndTerminate(f"Specfile {specFileName} does not exist",file=specFileName,errorCode=1)
     except Exception as e:
