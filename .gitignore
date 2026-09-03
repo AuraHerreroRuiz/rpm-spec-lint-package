@@ -1,5 +1,5 @@
 src/__pycache__
-
+.devcontainer/**/devcontainer-lock.json
 test/rpmbuild/SRPMS
 test/rpmbuild/RPMS
 test/rpmbuild/BUILD
