@@ -1,0 +1,15 @@
+{
+	"recommendations": [
+		"streetsidesoftware.code-spell-checker",
+		"charliermarsh.ruff",
+		"detachhead.basedpyright",
+		"redhat.vscode-yaml",
+		"yzhang.markdown-all-in-one",
+		"KylinIDETeam.kylin-python",
+		"docker.docker",
+		"SanjulaGanepola.github-local-actions",
+		"github.vscode-github-actions",
+		"tamasfe.even-better-toml",
+		"github.vscode-pull-request-github"
+	]
+}

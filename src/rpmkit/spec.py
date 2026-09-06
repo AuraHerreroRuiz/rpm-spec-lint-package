@@ -18,9 +18,9 @@ class Specfile:
   def lint(self) -> int:
     """Logs the lints the Specfile, returns the amount of fatal lints"""
     linter = Linter(self.path)
-    fatals, self.lints = linter.lint()
+    fatal_lint_count, self.lints = linter.lint()
     self.print_lints()
-    return fatals
+    return fatal_lint_count
 
   def print_lints(self):
     for lint in self.lints:

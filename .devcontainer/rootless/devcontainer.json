@@ -15,6 +15,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"streetsidesoftware.code-spell-checker",
+				"charliermarsh.ruff",
 				"detachhead.basedpyright",
 				"redhat.vscode-yaml",
 				"yzhang.markdown-all-in-one",
@@ -22,8 +24,8 @@
 				"docker.docker",
 				"SanjulaGanepola.github-local-actions",
 				"github.vscode-github-actions",
-				"charliermarsh.ruff",
-				"tamasfe.even-better-toml"
+				"tamasfe.even-better-toml",
+				"github.vscode-pull-request-github"
 			]
 		}
 	}

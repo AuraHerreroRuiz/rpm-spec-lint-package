@@ -18,4 +18,22 @@
 		"**/.forgejo/workflows/*.yaml"
 	],
 	"editor.formatOnSave": true,
+	"cSpell.files": [
+		"**"
+	],
+	"cSpell.words": [
+		"Aura",
+		"Herrero",
+		"rpmlintrc",
+		"Ruiz"
+	],
+	"cSpell.useGitignore": true,
+	"cSpell.spellCheckOnlyWorkspaceFiles": true,
+	"cSpell.ignorePaths": [
+		"package-lock.json",
+		"node_modules",
+		"vscode-extension",
+		".git/{info,lfs,logs,refs,objects}/**",
+		".git/{index,*refs,*HEAD}"
+	]
 }

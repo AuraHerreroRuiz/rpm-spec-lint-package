@@ -30,7 +30,7 @@ class Builder:
         print(line)
 
       async for line in process.stderr_lines():
-        # For some reason, dnf prints to sterr when installing packages.
+        # For some reason, dnf prints to stderr when installing packages.
         print(line)
       return_code = await process.wait()
       if return_code != 0:
