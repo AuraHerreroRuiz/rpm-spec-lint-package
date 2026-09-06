@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 
-from actions import logger
+from action import logger
 from errors import NotZeroReturnError, PathInvalidError
 from process import ProcessRunner
 

@@ -33,7 +33,9 @@ def notice(
   end_line: int | None = None,  # pyright: ignore[reportUnusedParameter]
 ):
   function_paramaters = locals()
-  function_paramaters.pop("message")  # message is required, not an optional parameter.
+  function_paramaters.pop(
+    "message"
+  )  # message is required, not an optional parameter.
 
   print(
     f"::notice{_parameters_to_workflow_parametres(function_paramaters)}::{message}",
@@ -51,7 +53,9 @@ def warning(
   end_line: int | None = None,  # pyright: ignore[reportUnusedParameter]
 ):
   function_paramaters = locals()
-  function_paramaters.pop("message")  # message is required, not an optional parameter.
+  function_paramaters.pop(
+    "message"
+  )  # message is required, not an optional parameter.
 
   print(
     f"::warning{_parameters_to_workflow_parametres(function_paramaters)}::{message}",
@@ -69,7 +73,9 @@ def error(
   end_line: int | None = None,  # pyright: ignore[reportUnusedParameter]
 ):
   function_paramaters = locals()
-  function_paramaters.pop("message")  # message is required, not an optional parameter.
+  function_paramaters.pop(
+    "message"
+  )  # message is required, not an optional parameter.
 
   print(
     f"::error{_parameters_to_workflow_parametres(function_paramaters)}::{message}",
@@ -77,6 +83,7 @@ def error(
   )
 
 
+# TODO remove
 def error_and_terminate(
   message: str,
   title: str | None = None,
@@ -111,7 +118,8 @@ def _parameters_to_workflow_parametres(parameters: dict[str, Any]) -> str:  # py
   if len(workflow_command_parameters) != 0:
     # Add beginning space and removing trailing comma
     workflow_command_parameters = (
-      " " + workflow_command_parameters[0 : len(workflow_command_parameters) - 1]
+      " "
+      + workflow_command_parameters[0 : len(workflow_command_parameters) - 1]
     )
 
   return workflow_command_parameters

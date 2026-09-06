@@ -1,6 +1,6 @@
 import os
 
-from actions import logger
+from action import logger
 from errors import PathInvalidError
 
 from .builder import Builder
