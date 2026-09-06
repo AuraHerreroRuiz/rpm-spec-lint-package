@@ -12,18 +12,18 @@ class Rpmdiff:
     REMOVED = ...
     def __init__(self, old, new, ignore=..., exclude=...) -> None:
         ...
-    
+
     def textdiff(self) -> LiteralString:
         ...
-    
+
     def differs(self) -> bool:
         ...
-    
+
     def sense2str(self, sense) -> str:
         ...
-    
+
     def req2str(self, req) -> LiteralString | Literal['PREREQ', 'REQUIRES']:
         ...
-    
+
 
 

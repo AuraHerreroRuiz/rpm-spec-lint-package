@@ -1,0 +1,10 @@
+#:schema https://json.schemastore.org/ruff.json
+
+line-length = 80
+indent-width = 2
+[format]
+indent-style = "space"
+quote-style = "double"
+line-ending = "lf"
+[lint]
+select = ["E", "W", "F", "I", "N"]

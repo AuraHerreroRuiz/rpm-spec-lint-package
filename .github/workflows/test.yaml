@@ -6,9 +6,12 @@ jobs:
     name: Test Package RPM
     steps:
       - name: Checkout action repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Prepare test source
+        run: cd test && tar -cf SOURCES/test-rpm.tar test-rpm.c
       - name: Test action
         id: build
         uses: ./
         with:
-          spec_file: test/rpmbuild/SPECS/test.spec
+          spec_file: test/test.spec
+          sources_dir: test/SOURCES

@@ -4,6 +4,6 @@ FROM fedora:latest
 COPY . .
 
 # Installing tools needed for rpmbuild
-RUN dnf install -y rpm-build python3-dnf rpmdevtools git rpmlint
+RUN dnf install -y rpm-build rpmdevtools rpmlint python3-dnf dnf5-plugins
 
 ENTRYPOINT ["python3.14", "/src/main.py"]

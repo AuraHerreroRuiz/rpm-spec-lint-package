@@ -59,7 +59,7 @@ def get_magic(path) -> Literal['']:
 class AbstractPkg:
     def cleanup(self) -> None:
         ...
-    
+
     def scriptprog(self, which) -> LiteralString | Literal['']:
         """
         Get the specified script interpreter as a string.
@@ -67,65 +67,65 @@ class AbstractPkg:
         interpreter arguments, if any.
         """
         ...
-    
+
     def __enter__(self) -> Self:
         ...
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         ...
-    
+
     def check_versioned_dep(self, name, version) -> bool:
         ...
-    
+
     def read_with_mmap(self, filename) -> str:
         """Mmap a file, return it's content decoded."""
         ...
-    
+
     def grep(self, regex, filename) -> int | None:
         """Grep regex from a file, return first matching line number (starting with 1)."""
         ...
-    
+
 
 
 class Pkg(AbstractPkg):
     _magic_from_compressed_re = ...
     def __init__(self, filename, dirname, header=..., is_source=..., extracted=..., verbose=...) -> None:
         ...
-    
+
     @property
     def is_no_source(self) -> list[Any] | Literal[False]:
         ...
-    
+
     def __getitem__(self, key) -> str | list[str | list[Any] | Any | None] | None:
         ...
-    
+
     def dir_name(self) -> str:
         ...
-    
+
     def check_signature(self) -> tuple[int, str]:
         ...
-    
+
     def cleanup(self) -> None:
         ...
-    
+
     def langtag(self, tag, lang) -> str | list[str | list[Any] | Any | None] | None:
         """Get value of tag in the given language."""
         ...
-    
+
     def readlink(self, pkgfile) -> None:
         """
         Resolve symlinks for the given PkgFile, return the dereferenced
         PkgFile if it is found in this package, None if not.
         """
         ...
-    
+
     def get_core_reqs(self) -> list[Any]:
         """
         Return the list of dependencies that are not found by find-requires
         withouth the flag RPM
         """
         ...
-    
+
 
 
 def get_installed_pkgs(name) -> list[Any]:
@@ -135,13 +135,13 @@ def get_installed_pkgs(name) -> list[Any]:
 class InstalledPkg(Pkg):
     def __init__(self, name, hdr=...) -> None:
         ...
-    
+
     def cleanup(self) -> None:
         ...
-    
+
     def check_signature(self) -> tuple[Literal[0], Literal['fake: pgp md5 OK']]:
         ...
-    
+
 
 
 class FakeHeader(dict):
@@ -150,44 +150,44 @@ class FakeHeader(dict):
         Replaces expressions like %{} with actual package
         """
         ...
-    
+
     def __missing__(self, key):
         ...
-    
+
 
 
 class FakePkg(AbstractPkg):
     _autoheaders = ...
     def __init__(self, name, is_source=...) -> None:
         ...
-    
+
     def add_file(self, path, name) -> PkgFile:
         ...
-    
+
     def create_files(self, files) -> None:
         """
         This is a helper method to create files(real files); not PkgFile
         objects.
         """
         ...
-    
+
     def add_dir(self, path, metadata=...) -> PkgFile:
         ...
-    
+
     def add_file_with_content(self, name, content, metadata=..., **flags) -> None:
         """
         Add file to the FakePkg and fill the file with provided
         string content.
         """
         ...
-    
+
     def initiate_files_base_data(self) -> None:
         """ This method is called after adding metadata of each file """
         ...
-    
+
     def add_header(self, header) -> None:
         ...
-    
+
     def add_symlink_to(self, name, target) -> None:
         """
         Add symlink to name file which path is related to name.
@@ -195,24 +195,24 @@ class FakePkg(AbstractPkg):
         /etc/bar that points to /etc/foo.
         """
         ...
-    
+
     def readlink(self, pkgfile) -> None:
         ...
-    
+
     def dir_name(self) -> str:
         ...
-    
+
     def md5_checksum(self, file_name) -> str:
         ...
-    
+
     def cleanup(self) -> None:
         ...
-    
+
     def get_core_reqs(self) -> list[Any]:
         ...
-    
+
     def __getitem__(self, key) -> None:
         ...
-    
+
 
 

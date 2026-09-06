@@ -26,7 +26,7 @@ class Config:
             command line.
         """
         ...
-    
+
     def find_configs(self, config=...) -> None:
         """
         Find and store paths to all config files.
@@ -40,7 +40,7 @@ class Config:
         added too.
         """
         ...
-    
+
     def load_config(self, config=...) -> None:
         """
         Load the configuration files and append it to local dictionary.
@@ -49,7 +49,7 @@ class Config:
         options.
         """
         ...
-    
+
     def load_rpmlintrc(self, rpmlintrc_file) -> None:
         """
         Load existing rpmlintrc files.
@@ -57,14 +57,14 @@ class Config:
         Only setBadness and addFilter are processed.
         """
         ...
-    
+
     def print_config(self) -> None:
         """Print the current state of the configuration."""
         ...
-    
+
     def set_badness(self, result, badness) -> None:
         """Set specific badness for some result."""
         ...
-    
+
 
 

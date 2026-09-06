@@ -1,5 +1,4 @@
-from typing import Any, Literal, TypedDict
-
+from typing import TypedDict
 
 class MessagesSeverityOcurrences(TypedDict,total=True):
     I: int
@@ -25,7 +24,7 @@ class Filter:
 
     score: int = 0
     """How many bad hits we already collected while collecting issues"""
-    error_details: dict[Any, Any] = {}
+    error_details: dict[str, str] = {}
     """Dictionary containing mapped values of descriptions for the errors."""
     printed_messages: MessagesSeverityOcurrences = {'I': 0,'W':0,'E':0}
     """Counter of how many issues we encountered"""

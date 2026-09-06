@@ -8,7 +8,7 @@ class ElfSection:
     """
     def __init__(self, name, size) -> None:
         ...
-    
+
 
 
 class ElfProgramHeader:
@@ -17,7 +17,7 @@ class ElfProgramHeader:
     """
     def __init__(self, name, flags) -> None:
         ...
-    
+
 
 
 class ElfDynamicSection:
@@ -26,7 +26,7 @@ class ElfDynamicSection:
     """
     def __init__(self, key, value) -> None:
         ...
-    
+
 
 
 class ElfSectionInfo:
@@ -62,10 +62,10 @@ class ElfSectionInfo:
     pic_regex = ...
     def __init__(self, path, extra_flags) -> None:
         ...
-    
+
     def parse(self) -> None:
         ...
-    
+
 
 
 class ElfProgramHeaderInfo:
@@ -88,10 +88,10 @@ class ElfProgramHeaderInfo:
     header_regex = ...
     def __init__(self, path, extra_flags) -> None:
         ...
-    
+
     def parse(self) -> None:
         ...
-    
+
 
 
 class ElfDynamicSectionInfo:
@@ -136,16 +136,16 @@ class ElfDynamicSectionInfo:
     rpath_regex = ...
     def __init__(self, path, extra_flags) -> None:
         ...
-    
+
     def parse(self) -> None:
         ...
-    
+
     def parse_meta(self) -> None:
         ...
-    
+
     def __getitem__(self, key) -> list[Any]:
         ...
-    
+
 
 
 class ElfSymbolTableInfo:
@@ -161,13 +161,13 @@ class ElfSymbolTableInfo:
     """
     def __init__(self, path, extra_flags) -> None:
         ...
-    
+
     def parse(self) -> None:
         ...
-    
+
     def get_functions_for_regex(self, regex) -> Generator[Any, Any, None]:
         ...
-    
+
 
 
 class ElfCommentInfo:
@@ -178,10 +178,10 @@ class ElfCommentInfo:
     comment_regex = ...
     def __init__(self, path, extra_flags) -> None:
         ...
-    
+
     def parse(self) -> None:
         ...
-    
+
 
 
 class ReadelfParser:
@@ -193,9 +193,9 @@ class ReadelfParser:
     so_regex = ...
     def __init__(self, pkgfile_path, path) -> None:
         ...
-    
+
     def parsing_failed_reason(self) -> str | None:
         ...
-    
+
 
 

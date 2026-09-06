@@ -6,26 +6,26 @@ class PkgFile:
     __slots__ = ...
     def __init__(self, name) -> None:
         ...
-    
+
     @property
     def is_config(self):
         ...
-    
+
     @property
     def is_doc(self):
         ...
-    
+
     @property
     def is_noreplace(self):
         ...
-    
+
     @property
     def is_ghost(self):
         ...
-    
+
     @property
     def is_missingok(self):
         ...
-    
+
 
 

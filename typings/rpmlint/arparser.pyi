@@ -8,9 +8,9 @@ class ArParser:
     """
     def __init__(self, pkgfile_path) -> None:
         ...
-    
+
     def parse(self) -> None:
         ...
-    
+
 
 

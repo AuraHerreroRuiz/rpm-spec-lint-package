@@ -36,12 +36,12 @@ class LddParser:
     undef_regex = ...
     def __init__(self, pkgfile_path, path, is_installed_pkg) -> None:
         ...
-    
+
     def parse_dependencies(self) -> None:
         ...
-    
+
     def parse_undefined_symbols(self) -> None:
         ...
-    
+
 
 

@@ -23,9 +23,9 @@ class ObjdumpParser:
     dw_at_prefix = ...
     def __init__(self, pkgfile_path, path) -> None:
         ...
-    
+
     def parse_dwarf_compilation_units(self) -> None:
         ...
-    
+
 
 

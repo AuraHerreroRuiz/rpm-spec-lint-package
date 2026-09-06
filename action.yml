@@ -6,6 +6,9 @@ inputs:
   spec_file:
     description: 'Path of the spec file to build'
     required: true
+  sources_dir:
+    description: 'Path of files to copy to "SOURCES" on the rpmbuild directory'
+    required: false
 
 outputs:
   source_rpm_path:
@@ -23,5 +26,4 @@ runs:
 branding:
   icon: 'package'
   color: 'red'
-
 

@@ -1,7 +1,6 @@
 
 from typing import Any, TypedDict
 
-
 class LintOptions(TypedDict,total=True):
 
     """

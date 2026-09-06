@@ -3,6 +3,7 @@ from typing import Literal
 
 from rpmlint.cli import LintOptions
 from rpmlint.filter import Filter
+
 type ReturnCodes = Literal[0, 66, 65, 64]
 
 class Lint:

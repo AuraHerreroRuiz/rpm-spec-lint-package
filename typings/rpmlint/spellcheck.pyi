@@ -11,7 +11,7 @@ class Spellcheck:
     _enchant_checkers = ...
     def __init__(self) -> None:
         ...
-    
+
     def spell_check(self, text, fmt, lang=..., pkgname=..., ignored_words=...) -> dict[Any, Any] | None:
         """
         Spell check string and return list of warnings if we found out any typos.
@@ -22,6 +22,6 @@ class Spellcheck:
         ignored_words: words to be ignored by the spellchecker
         """
         ...
-    
+
 
 
