@@ -6,7 +6,7 @@ import subprocess
 from action import MessageParameters, logger
 from action.errors import ActionRuntimeError
 from errors import InternalError, PathInvalidError
-from process import NotZeroReturnError, ProcessStdStreamLogger
+from process import ProcessStdStreamLogger
 
 
 class Builder:
