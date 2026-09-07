@@ -1,2 +1,4 @@
 src/**/__pycache__
 .devcontainer/**/devcontainer-lock.json
+.tmp
+build

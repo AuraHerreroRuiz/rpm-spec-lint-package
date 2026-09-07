@@ -1,14 +1,11 @@
-## Inputs parsed from github action's env variables
-
 import os
-from collections.abc import Set
 from pathlib import Path
 from types import TracebackType
 
 from action.errors import (
+  ActionEnvironmentInvalidError,
   ActionRuntimeError,
   UndefinedInputError,
-  WorkspaceEnvironmentInvalidError,
 )
 from errors import UnexpectedError
 
@@ -16,20 +13,21 @@ from .logger import (
   _error_and_exit as log_error_and_exit,  # pyright: ignore[reportPrivateUsage]
 )
 
-Artifact = Path
-
 
 class Action:
   _ENV_WORKSPACE: str = "GITHUB_WORKSPACE"
-  _ENV_ARTIFACTS: str = "GITHUB_ARTIFACTS"
+  _ENV_OUTPUT_FILE_PATH: str = "GITHUB_OUTPUT"
 
   def __init__(self):
-    self.workspace: Path = self._get_workspace()
-    self.inputs: "Action.Inputs" = self.Inputs(self)
-    self.output_artifacts: Set[Artifact] = set()
+    try:
+      self.workspace: Path = self._get_workspace()
+      self.inputs: "Action.Inputs" = self.Inputs(self)
+      self.outputs: "Action.Outputs" = self.Outputs()
+    except Exception as e:
+      _handle_action_errors(e)
 
-  def __enter__(self):
-    return (self.inputs, self.output_artifacts)
+  def __enter__(self) -> tuple[Path,"Inputs", "Outputs"]:
+    return (self.workspace, self.inputs, self.outputs)
 
   def __exit__(
     self,
@@ -38,28 +36,55 @@ class Action:
     exception_traceback: TracebackType | None,
   ) -> bool | None:
     if exception_type is None or exception_value is None:
-      self._set_output_artifacts(*self.output_artifacts)
-    elif issubclass(exception_type,ActionRuntimeError) and isinstance(
-      exception_value, ActionRuntimeError
-    ):
-      log_error_and_exit(exception_value)
+      try:
+        self._set_outputs(self.outputs)
+      except Exception as e:
+        _handle_action_errors(e)
     else:
-      log_error_and_exit(UnexpectedError(exception_value))
+      _handle_action_errors(exception_value)
 
-  def _set_output_artifacts(self, *artifacts: Artifact):
-    for artifact in artifacts:
-      os.environ[self._ENV_ARTIFACTS] = os.getenv(self._ENV_ARTIFACTS, "").join(
-        [str(artifact.relative_to(self.workspace, walk_up=True)), "\n"]
+  def _set_outputs(self, outputs: "Outputs"):
+    with open(self._get_outputs_file(), "a") as list:
+      for key, path in outputs.serialise().items():
+        _ = list.write(
+          f"{key}={str(path.relative_to(self.workspace, walk_up=False))}\n"
+        )
+
+  def _get_action_path(self, environment_variable: str):
+    path = os.getenv(environment_variable)
+    if isinstance(path, str):
+      return Path(path)
+    else:
+      log_error_and_exit(
+        ActionEnvironmentInvalidError(
+          f"{environment_variable} variable is not defined"
+        )
       )
 
   def _get_workspace(self) -> Path:
-    workspace = os.getenv(self._ENV_WORKSPACE)
-    if isinstance(workspace, str):
-      return Path(workspace)
+    workspace = self._get_action_path(self._ENV_WORKSPACE)
+    if workspace.is_dir():
+      return workspace
     else:
       log_error_and_exit(
-        WorkspaceEnvironmentInvalidError(
-          "Workspace environment variable is not defined"
+        ActionEnvironmentInvalidError(
+          "Workspace environment variable "
+          + f"{self._ENV_WORKSPACE}={os.getenv(self._ENV_WORKSPACE)} "
+          + "does not point to a directory."
+        )
+      )
+
+  def _get_outputs_file(self) -> Path:
+    artifact_list = self._get_action_path(self._ENV_OUTPUT_FILE_PATH)
+    if artifact_list.is_file():
+      return artifact_list
+    else:
+      log_error_and_exit(
+        ActionEnvironmentInvalidError(
+          "Output environment variable "
+          + f"{self._ENV_OUTPUT_FILE_PATH}"
+          + f"={os.getenv(self._ENV_OUTPUT_FILE_PATH)} "
+          + "does not point to a file."
         )
       )
 
@@ -82,3 +107,23 @@ class Action:
       if input is None:
         log_error_and_exit(UndefinedInputError(input_key))
       return input
+
+  class Outputs:
+    def __init__(self):
+      self.rpm_directory: Path
+      self.source_rpm_directory: Path
+
+    def serialise(self) -> dict[str, Path]:
+      return {
+        "rpm_directory_path": self.rpm_directory,
+        "source_rpm_directory_path": self.source_rpm_directory,
+      }
+
+
+def _handle_action_errors(e: BaseException):
+  if issubclass(type(e), ActionRuntimeError) and isinstance(
+    e, ActionRuntimeError
+  ):
+    log_error_and_exit(e)
+  else:
+    log_error_and_exit(UnexpectedError(e))

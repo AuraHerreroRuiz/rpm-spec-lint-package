@@ -66,8 +66,8 @@ class Linting:
   "Lint error details"
 
 class Linter:
-  def __init__(self,rpm_file_path: str) -> None:
-    self.path: str = rpm_file_path
+  def __init__(self,rpm_file_path: Path) -> None:
+    self.path: Path = rpm_file_path
 
   def lint(self) -> tuple[int, list[Linting]]:
     "Returns the amount of fatal lints, and a list of all the lintings."
@@ -90,7 +90,7 @@ class Linter:
         "verbose": False,
       }
     )
-    linter.validate_file(Path(self.path), True)
+    linter.validate_file(self.path, True)
 
     for result in linter.output.results:
       lint_message = re.search(

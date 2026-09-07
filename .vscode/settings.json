@@ -25,7 +25,9 @@
 		"Aura",
 		"Herrero",
 		"rpmlintrc",
-		"Ruiz"
+		"RPMS",
+		"Ruiz",
+		"SRPMS"
 	],
 	"cSpell.useGitignore": true,
 	"cSpell.spellCheckOnlyWorkspaceFiles": true,

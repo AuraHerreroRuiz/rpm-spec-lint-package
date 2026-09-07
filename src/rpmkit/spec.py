@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from action import MessageParameters, logger
 from action.errors import ActionRuntimeError
@@ -9,11 +10,14 @@ from .linter import Linter, Linting, LintLevel
 
 
 class Specfile:
-  def __init__(self, path: str, sources_dir: str | None) -> None:
-    if not os.path.isfile(path):
-      raise PathInvalidError(message="Specfile not found", path=path)
-    self.path: str = path
-    self.sources_dir: str | None = sources_dir
+  def __init__(
+    self, spec: Path, build_output_dir: Path, sources_dir: Path | None
+  ) -> None:
+    if not os.path.isfile(spec):
+      raise PathInvalidError(message="Specfile not found", path=str(spec))
+    self.path: Path = spec
+    self.build_output_dir: Path = build_output_dir
+    self.sources_dir: Path | None = sources_dir
     self.lints: list[Linting] = []
 
   def lint(self) -> None:
@@ -25,7 +29,7 @@ class Specfile:
     fatal_lint_count, self.lints = linter.lint()
     self.print_lints()
     if fatal_lint_count > 0:
-      raise FatalLintsError(self.path)
+      raise FatalLintsError(str(self.path))
 
   def print_lints(self):
     for lint in self.lints:
@@ -41,22 +45,22 @@ class Specfile:
         case LintLevel.Error:
           logger.error(
             message,
-            MessageParameters(title=title, file=self.path, line=lint.line),
+            MessageParameters(title=title, file=str(self.path), line=lint.line),
           )
         case LintLevel.Warning:
           logger.warning(
             message,
-            MessageParameters(title=title, file=self.path, line=lint.line),
+            MessageParameters(title=title, file=str(self.path), line=lint.line),
           )
         case LintLevel.Information:
           logger.notice(
             message,
-            MessageParameters(title=title, file=self.path, line=lint.line),
+            MessageParameters(title=title, file=str(self.path), line=lint.line),
           )
 
   def build(self):
-    builder = Builder(self.path, self.sources_dir)
-    builder.build()
+    builder = Builder(self.path, self.build_output_dir, self.sources_dir)
+    return builder.build()
 
 
 class FatalLintsError(ActionRuntimeError):

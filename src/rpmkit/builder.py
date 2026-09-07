@@ -1,8 +1,10 @@
 import asyncio
 import os
 import shutil
-import subprocess
+from pathlib import Path
+from typing import Any, TypeAlias
 
+import process
 from action import MessageParameters, logger
 from action.errors import ActionRuntimeError
 from errors import InternalError, PathInvalidError
@@ -10,21 +12,40 @@ from process import ProcessStdStreamLogger
 
 
 class Builder:
-  def __init__(self, spec_path: str, sources_dir: str | None):
-    self.spec_path: str = spec_path
-    self.sources_dir: str | None = sources_dir
+  SourceRPMSPath: TypeAlias = Path
+  RPMSPath: TypeAlias = Path
 
-  def build(self):
-    asyncio.run(self.install_build_deps())
-    asyncio.run(self.fetch_sources())
-    self.copy_sources()
-    asyncio.run(self.build_rpm())
+  def __init__(
+    self, spec: Path, build_output_dir: Path, sources_dir: Path | None
+  ):
+    self.spec: Path = spec
+    self.build_output_dir: Path = build_output_dir
+    self.sources_dir: Path | None = sources_dir
+    self.rpms_dir: "Builder.RPMSPath" = build_output_dir.joinpath("RPMS")
+    self.rpms_dir.mkdir(exist_ok=True)
+    self.source_rpms_dir: "Builder.SourceRPMSPath" = build_output_dir.joinpath(
+      "SRPMS"
+    )
+    self.source_rpms_dir.mkdir(exist_ok=True)
+    self._rpm_build_command_macro_definitions: list[str] = [
+      "--define",
+      f"_rpmdir {self.rpms_dir}",
+      "--define",
+      f"_srcrpmdir {self.source_rpms_dir}",
+    ]
 
-  async def install_build_deps(self) -> None:
+  def build(self) -> tuple[RPMSPath, SourceRPMSPath]:
+    asyncio.run(self._install_build_deps())
+    asyncio.run(self._fetch_sources())
+    self._copy_sources()
+    asyncio.run(self._build_rpm())
+    return self.rpms_dir, self.source_rpms_dir
+
+  async def _install_build_deps(self) -> None:
     with logger.LogGroup("Installing build dependencies"):
       try:
         process = ProcessStdStreamLogger(
-          ["dnf5", "-y", "builddep", self.spec_path]
+          ["dnf5", "-y", "builddep", str(self.spec)]
         )
         await process.start()
 
@@ -36,13 +57,19 @@ class Builder:
           print(line)
         await process.wait()
       except Exception as e:
-        raise InstallBuildDependenciesError(e, self.spec_path)
+        raise InstallBuildDependenciesError(e, str(self.spec))
 
-  async def build_rpm(self):
+  async def _build_rpm(self):
     with logger.LogGroup("Building rpm"):
       try:
         process = ProcessStdStreamLogger(
-          ["rpmbuild", "--quiet", "-ba", self.spec_path],
+          ["rpmbuild"]
+          + self._rpm_build_command_macro_definitions
+          + [
+            "--quiet",
+            "-ba",
+            str(self.spec),
+          ],
         )
         await process.start()
 
@@ -52,17 +79,17 @@ class Builder:
         async for line in process.stderr_lines():
           logger.warning(
             line.removeprefix("warning: ").removesuffix("error: "),
-            MessageParameters(file=self.spec_path),
+            MessageParameters(file=str(self.spec)),
           )
         await process.wait()
       except Exception as e:
-        raise BuildPackageError(e, self.spec_path)
+        raise BuildPackageError(e, str(self.spec))
 
-  async def fetch_sources(self):
+  async def _fetch_sources(self):
     with logger.LogGroup("Fetching sources"):
       try:
         process = ProcessStdStreamLogger(
-          ["spectool", "--get-files", "-R", self.spec_path],
+          ["spectool", "--get-files", "-R", str(self.spec)],
         )
         await process.start()
 
@@ -70,30 +97,62 @@ class Builder:
           print(line)
 
         async for line in process.stderr_lines():
-          logger.warning(line, MessageParameters(file=self.spec_path))
+          logger.warning(line, MessageParameters(file=str(self.spec)))
         await process.wait()
       except Exception as e:
-        raise FetchBuildSourcesError(e, self.spec_path)
+        raise FetchBuildSourcesError(e, str(self.spec))
 
-  def copy_sources(self) -> None:
+  def _copy_sources(self) -> None:
     if self.sources_dir is not None:
-      if not os.path.isdir(self.sources_dir):
+      if not self.sources_dir.is_dir():
         raise PathInvalidError(
-          message="Sources dir is not a directory", path=self.sources_dir
+          message="Sources dir is not a directory", path=str(self.sources_dir)
         )
       with logger.LogGroup("Copying sources from sources_dir"):
-        dir_check = subprocess.run(
-          ["rpm", "--eval", "%{_sourcedir}"],
-          stdout=subprocess.PIPE,
-          stderr=subprocess.PIPE,
-        )
-        if dir_check.returncode != 0:
-          raise InternalError(
-            dir_check.stderr.decode(),
-            MessageParameters("Error copying sources_dir"),
+        try:
+          dir_check, _ = process.run(["rpmbuild", "--eval", "%{_sourcedir}"])
+          dest_dir = dir_check.strip()
+          _: str = shutil.copytree(
+            self.sources_dir, dest_dir, dirs_exist_ok=True
           )
-        dest_dir = dir_check.stdout.decode().strip()
-        _: str = shutil.copytree(self.sources_dir, dest_dir, dirs_exist_ok=True)
+        except Exception as e:
+          raise InternalError(
+            str(e),
+            parameters=MessageParameters("Error copying sources_dir"),
+          )
+
+  # def _get_build_output_paths(self) -> tuple[RPMSPath, SourceRPMSPath]:
+  #   try:
+  #     rpms_dir_macro, _ = process.run(
+  #       [
+  #         "rpmbuild",
+  #         "--define",
+  #         f"'_topdir {self.build_output_dir}'",
+  #         "--eval",
+  #         "%{_rpmdir}",
+  #       ]
+  #     )
+  #     source_rpms_dir_macro, _ = process.run(
+  #       [
+  #         "rpmbuild",
+  #         "--define",
+  #         f"'_topdir {self.build_output_dir}'",
+  #         "--eval",
+  #         "%{_srcrpmdir}",
+  #       ]
+  #     )
+
+  #     rpms_dir = Path(rpms_dir_macro.strip()).expanduser().resolve()
+  #     source_rpms_dir = (
+  #       Path(source_rpms_dir_macro.strip()).expanduser().resolve()
+  #     )
+
+  #     return rpms_dir, source_rpms_dir
+  #   except Exception as e:
+  #     raise InternalError(
+  #       str(e),
+  #       parameters=MessageParameters("Error compiling artifacts list"),
+  #     )
 
 
 class InstallBuildDependenciesError(ActionRuntimeError):

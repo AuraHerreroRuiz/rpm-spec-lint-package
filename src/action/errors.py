@@ -16,7 +16,7 @@ class ActionRuntimeError(Exception, metaclass=ABCMeta):
     self.exit_code: int = exit_code
 
 
-class WorkspaceEnvironmentInvalidError(ActionRuntimeError):
+class ActionEnvironmentInvalidError(ActionRuntimeError):
   def __init__(self, message: str) -> None:
     super().__init__(message, 1)
 

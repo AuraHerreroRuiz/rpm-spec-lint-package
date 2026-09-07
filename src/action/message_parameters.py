@@ -15,21 +15,21 @@ class MessageParameters:
     self.line: int | None = line
     self.end_line: int | None = end_line
 
+  PARAMETER_MAPPING: dict[str, str] = {
+    "title": "title",
+    "file": "file",
+    "column": "col",
+    "end_column": "endColumn",
+    "line": "line",
+    "end_line": "endLine",
+  }
   def _serialise(self) -> str:
     # Class to github parameter names
-    parameter_mapping = {
-      "title": "title",
-      "file": "file",
-      "column": "col",
-      "end_column": "endColumn",
-      "line": "line",
-      "end_line": "endLine",
-    }
     workflow_command_parameters = ""
     for parameter, value in vars(self).items():  # pyright: ignore[reportAny]
       if value is not None:
         workflow_command_parameters += (
-          f"{parameter_mapping[parameter]}={value},"
+          f"{self.PARAMETER_MAPPING[parameter]}={value},"
         )
 
     if len(workflow_command_parameters) != 0:

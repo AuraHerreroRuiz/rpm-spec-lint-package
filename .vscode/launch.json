@@ -8,14 +8,17 @@
       "name": "Python Debugger: Current File",
       "type": "python",
       "request": "launch",
-      "preLaunchTask": "Build test tar",
+      "preLaunchTask": "Prepare debug tar and github_output",
+      "postDebugTask": "Show action output",
       "program": "src/main.py",
       "console": "internalConsole",
+      "consoleTitle": "Package RPM Debug Console",
       "env": {
         "GITHUB_WORKSPACE": "./",
-        "INPUT_SPEC_FILE": "test/test.spec",
-        "INPUT_SOURCES_DIR": "test/SOURCES"
-      }
+        "INPUT_SPEC_FILE": "${workspaceFolder}/test/test.spec",
+        "INPUT_SOURCES_DIR": "${workspaceFolder}/test/SOURCES",
+        "GITHUB_OUTPUT": "${workspaceFolder}/.tmp/github_output"
+      },
     }
   ]
 }

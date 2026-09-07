@@ -9,6 +9,12 @@ inputs:
   sources_dir:
     description: 'Path of files to copy to "SOURCES" on the rpmbuild directory'
     required: false
+outputs:
+  rpm_directory_path:
+    description: 'path to "RPMS" directory'
+  source_rpm_directory_path:
+    description: 'Path to "SRPMS" directory'
+
 runs:
   using: 'docker'
   image: 'Dockerfile'

@@ -4,12 +4,20 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build test tar",
+			"label": "Prepare debug tar and github_output",
 			"type": "shell",
 			"icon": {
 				"id": "beaker"
 			},
-			"command": "cd test && tar -cf SOURCES/test-rpm.tar test-rpm.c"
+			"command": "mkdir -p ${workspaceFolder}/.tmp && echo -n '' > ${workspaceFolder}/.tmp/github_output && cd test && tar -cf SOURCES/test-rpm.tar test-rpm.c"
+		},
+		{
+			"label": "Show action output",
+			"type": "shell",
+			"icon": {
+				"id": "output"
+			},
+			"command": "code -g ${workspaceFolder}/.tmp/github_output"
 		}
 	]
 }
