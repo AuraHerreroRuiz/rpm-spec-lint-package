@@ -24,7 +24,7 @@ class Builder:
     with logger.LogGroup("Installing build dependencies"):
       try:
         process = ProcessStdStreamLogger(
-          ["dnf5", "-y", "--verbose", "builddep", self.spec_path]
+          ["dnf5", "-y", "builddep", self.spec_path]
         )
         await process.start()
 
@@ -42,7 +42,7 @@ class Builder:
     with logger.LogGroup("Building rpm"):
       try:
         process = ProcessStdStreamLogger(
-          ["rpmbuild", "--verbose", "-ba", self.spec_path],
+          ["rpmbuild", "--quiet", "-ba", self.spec_path],
         )
         await process.start()
 
