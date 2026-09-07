@@ -3,9 +3,10 @@ import os
 import shutil
 import subprocess
 
-from action import logger
-from errors import NotZeroReturnError, PathInvalidError
-from process import ProcessRunner
+from action import MessageParameters, logger
+from action.errors import ActionRuntimeError
+from errors import InternalError, PathInvalidError
+from process import NotZeroReturnError, ProcessStdStreamLogger
 
 
 class Builder:
@@ -21,55 +22,58 @@ class Builder:
 
   async def install_build_deps(self) -> None:
     with logger.LogGroup("Installing build dependencies"):
-      process = ProcessRunner(
-        ["dnf5", "-y", "--quiet", "builddep", self.spec_path]
-      )
-      await process.start()
+      try:
+        process = ProcessStdStreamLogger(
+          ["dnf5", "-y", "--verbose", "builddep", self.spec_path]
+        )
+        await process.start()
 
-      async for line in process.stdout_lines():
-        print(line)
+        async for line in process.stdout_lines():
+          print(line)
 
-      async for line in process.stderr_lines():
-        # For some reason, dnf prints to stderr when installing packages.
-        print(line)
-      return_code = await process.wait()
-      if return_code != 0:
-        raise NotZeroReturnError(return_code)
+        async for line in process.stderr_lines():
+          # For some reason, dnf prints to stderr when installing packages.
+          print(line)
+        await process.wait()
+      except Exception as e:
+        raise InstallBuildDependenciesError(e, self.spec_path)
 
   async def build_rpm(self):
     with logger.LogGroup("Building rpm"):
-      process = ProcessRunner(
-        ["rpmbuild", "--quiet", "-ba", self.spec_path],
-      )
-      await process.start()
+      try:
+        process = ProcessStdStreamLogger(
+          ["rpmbuild", "--verbose", "-ba", self.spec_path],
+        )
+        await process.start()
 
-      async for line in process.stdout_lines():
-        print(line)
+        async for line in process.stdout_lines():
+          print(line)
 
-      async for line in process.stderr_lines():
-        logger.warning(line.removeprefix("warning: ").removesuffix("error: "))
-
-      return_code = await process.wait()
-      if return_code != 0:
-        raise NotZeroReturnError(return_code)
+        async for line in process.stderr_lines():
+          logger.warning(
+            line.removeprefix("warning: ").removesuffix("error: "),
+            MessageParameters(file=self.spec_path),
+          )
+        await process.wait()
+      except Exception as e:
+        raise BuildPackageError(e, self.spec_path)
 
   async def fetch_sources(self):
     with logger.LogGroup("Fetching sources"):
-      process = ProcessRunner(
-        ["spectool", "--get-files", "-R", self.spec_path],
-        # stderr=logger.LoggerIO(logger.error),
-      )
-      await process.start()
+      try:
+        process = ProcessStdStreamLogger(
+          ["spectool", "--get-files", "-R", self.spec_path],
+        )
+        await process.start()
 
-      async for line in process.stdout_lines():
-        print(line)
+        async for line in process.stdout_lines():
+          print(line)
 
-      async for line in process.stderr_lines():
-        logger.warning(line)
-
-      return_code = await process.wait()
-      if return_code != 0:
-        raise NotZeroReturnError(return_code)
+        async for line in process.stderr_lines():
+          logger.warning(line, MessageParameters(file=self.spec_path))
+        await process.wait()
+      except Exception as e:
+        raise FetchBuildSourcesError(e, self.spec_path)
 
   def copy_sources(self) -> None:
     if self.sources_dir is not None:
@@ -84,7 +88,38 @@ class Builder:
           stderr=subprocess.PIPE,
         )
         if dir_check.returncode != 0:
-          logger.error(dir_check.stderr.decode(), "Error copying sources_dir")
-          raise NotZeroReturnError(dir_check.returncode)
+          raise InternalError(
+            dir_check.stderr.decode(),
+            MessageParameters("Error copying sources_dir"),
+          )
         dest_dir = dir_check.stdout.decode().strip()
         _: str = shutil.copytree(self.sources_dir, dest_dir, dirs_exist_ok=True)
+
+
+class InstallBuildDependenciesError(ActionRuntimeError):
+  def __init__(self, error: BaseException, file: str):
+    super().__init__(
+      str(error),
+      5,
+      MessageParameters(
+        title="Error while installing build dependencies", file=file
+      ),
+    )
+
+
+class FetchBuildSourcesError(ActionRuntimeError):
+  def __init__(self, error: BaseException, file: str):
+    super().__init__(
+      str(error),
+      6,
+      MessageParameters(title="Error while fetching build sources", file=file),
+    )
+
+
+class BuildPackageError(ActionRuntimeError):
+  def __init__(self, error: BaseException, file: str):
+    super().__init__(
+      str(error),
+      7,
+      MessageParameters(title="Error while building package", file=file),
+    )

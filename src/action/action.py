@@ -5,9 +5,16 @@ from collections.abc import Set
 from pathlib import Path
 from types import TracebackType
 
-from action.errors import ActionSetupError
+from action.errors import (
+  ActionRuntimeError,
+  UndefinedInputError,
+  WorkspaceEnvironmentInvalidError,
+)
+from errors import UnexpectedError
 
-from . import logger
+from .logger import (
+  _error_and_exit as log_error_and_exit,  # pyright: ignore[reportPrivateUsage]
+)
 
 Artifact = Path
 
@@ -26,11 +33,18 @@ class Action:
 
   def __exit__(
     self,
-    exc_type: type[BaseException] | None,
-    exc_val: BaseException | None,
-    exc_tb: TracebackType | None,
+    exception_type: type[BaseException] | None,
+    exception_value: BaseException | None,
+    exception_traceback: TracebackType | None,
   ) -> bool | None:
-    self._set_output_artifacts(*self.output_artifacts)
+    if exception_type is None or exception_value is None:
+      self._set_output_artifacts(*self.output_artifacts)
+    elif issubclass(exception_type,ActionRuntimeError) and isinstance(
+      exception_value, ActionRuntimeError
+    ):
+      log_error_and_exit(exception_value)
+    else:
+      log_error_and_exit(UnexpectedError(exception_value))
 
   def _set_output_artifacts(self, *artifacts: Artifact):
     for artifact in artifacts:
@@ -43,10 +57,11 @@ class Action:
     if isinstance(workspace, str):
       return Path(workspace)
     else:
-      raise ActionSetupError("Workspace environment variable is not defined")
-      # logger.error_and_terminate(
-      #   , error_code=128
-      # )
+      log_error_and_exit(
+        WorkspaceEnvironmentInvalidError(
+          "Workspace environment variable is not defined"
+        )
+      )
 
   class Inputs:
     _ENV_INPUTS_PREFIX: str = "INPUT_"
@@ -65,7 +80,5 @@ class Action:
     def _get_input_or_error(self, input_key: str) -> str:
       input = self._get_input(input_key)
       if input is None:
-        logger.error_and_terminate(
-          f"Required input {input_key} is not defined", error_code=256
-        )
-      return input  # pyright: ignore[reportReturnType]
+        log_error_and_exit(UndefinedInputError(input_key))
+      return input

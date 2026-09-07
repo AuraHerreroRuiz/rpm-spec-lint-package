@@ -1,6 +1,7 @@
 import os
 
-from action import logger
+from action import MessageParameters, logger
+from action.errors import ActionRuntimeError
 from errors import PathInvalidError
 
 from .builder import Builder
@@ -15,12 +16,16 @@ class Specfile:
     self.sources_dir: str | None = sources_dir
     self.lints: list[Linting] = []
 
-  def lint(self) -> int:
-    """Logs the lints the Specfile, returns the amount of fatal lints"""
+  def lint(self) -> None:
+    """
+    Logs the lints the Specfile.
+    Raises CriticalLintsError if there are critical lints.
+    """
     linter = Linter(self.path)
     fatal_lint_count, self.lints = linter.lint()
     self.print_lints()
-    return fatal_lint_count
+    if fatal_lint_count > 0:
+      raise FatalLintsError(self.path)
 
   def print_lints(self):
     for lint in self.lints:
@@ -35,17 +40,27 @@ class Specfile:
       match lint.level:
         case LintLevel.Error:
           logger.error(
-            message=message, title=title, file=self.path, line=lint.line
+            message,
+            MessageParameters(title=title, file=self.path, line=lint.line),
           )
         case LintLevel.Warning:
           logger.warning(
-            message=message, title=title, file=self.path, line=lint.line
+            message,
+            MessageParameters(title=title, file=self.path, line=lint.line),
           )
         case LintLevel.Information:
           logger.notice(
-            message=message, title=title, file=self.path, line=lint.line
+            message,
+            MessageParameters(title=title, file=self.path, line=lint.line),
           )
 
   def build(self):
     builder = Builder(self.path, self.sources_dir)
     builder.build()
+
+
+class FatalLintsError(ActionRuntimeError):
+  def __init__(self, file: str) -> None:
+    super().__init__(
+      "More than one critical lint was found.", 3, MessageParameters(file=file)
+    )

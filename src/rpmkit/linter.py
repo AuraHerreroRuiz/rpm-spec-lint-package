@@ -5,6 +5,23 @@ from pathlib import Path
 
 from rpmlint.lint import Lint
 
+from action.errors import ActionRuntimeError
+from action.message_parameters import MessageParameters
+
+
+class FatalLintsError(ActionRuntimeError):
+  def __init__(
+    self,
+    file: str
+  ) -> None:
+    super().__init__(
+      "More than one critical lint was found.",
+      3,
+      MessageParameters(
+        file=file
+      ))
+
+
 
 class LintLevel(Enum):
   Information = "I"

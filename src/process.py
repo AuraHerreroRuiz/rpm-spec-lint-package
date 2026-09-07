@@ -1,7 +1,9 @@
 import asyncio
 
+from errors import InternalError
 
-class ProcessRunner:
+
+class ProcessStdStreamLogger:
   def __init__(self, command_args: list[str]):
     self.command_args: list[str] = command_args
     self._process: asyncio.subprocess.Process | None = None
@@ -10,7 +12,7 @@ class ProcessRunner:
     self._process = await asyncio.create_subprocess_exec(
       *self.command_args,
       stdout=asyncio.subprocess.PIPE,
-      stderr=asyncio.subprocess.PIPE
+      stderr=asyncio.subprocess.PIPE,
     )
 
   def stdout_lines(self):
@@ -19,10 +21,9 @@ class ProcessRunner:
   def stderr_lines(self):
     return self._output_lines(stream=self._get_running_process().stderr)
 
-
-  async def _output_lines(self,stream: asyncio.StreamReader | None):
+  async def _output_lines(self, stream: asyncio.StreamReader | None):
     if stream is None:
-      raise RuntimeError("Not started")
+      raise UnexpectedProcessAccessError()
     while True:
       line_bytes: bytes = await stream.readline()
       if not line_bytes:
@@ -34,10 +35,27 @@ class ProcessRunner:
 
   def _get_running_process(self):
     if self._process is None:
-      raise RuntimeError("Not started")
+      raise UnexpectedProcessAccessError()
     return self._process
 
-  async def wait(self) -> int:
+  async def wait(self) -> None:
     if self._process is None:
-      raise RuntimeError("Not started")
-    return await self._process.wait()
+      raise UnexpectedProcessAccessError()
+    return_code = await self._process.wait()
+    if return_code != 0:
+      raise NotZeroReturnError(return_code)
+    return
+
+
+class UnexpectedProcessAccessError(InternalError):
+  def __init__(self):
+    super().__init__(
+      "Process status fetched while it has not started. "
+      + "Make sure the implementation uses start() first."
+    )
+
+
+class NotZeroReturnError(Exception):
+  def __init__(self, return_code: int) -> None:
+    self.return_code: int = return_code
+    super().__init__(f"The process returned the code {return_code}")
