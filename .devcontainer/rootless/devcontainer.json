@@ -11,7 +11,7 @@
 		"ghcr.io/devcontainers/features/docker-in-docker:4": {}
 	},
 	"onCreateCommand": "wget https://github.com/nektos/act/releases/download/v0.2.89/act_Linux_x86_64.tar.gz -O /tmp/act.tar.gz && echo '0191d6f1f3b716b5c55820032605d05fc3c1cdbf581ebeff655019e5dd1524c0 /tmp/act.tar.gz' | sha256sum -c && sudo tar -zxC /usr/local/bin -f /tmp/act.tar.gz act",
-	"privileged": true,
+	"privileged": false,
 	"customizations": {
 		"vscode": {
 			"extensions": [
