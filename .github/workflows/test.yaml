@@ -15,3 +15,10 @@ jobs:
         with:
           spec_file: test/test.spec
           sources_dir: test/SOURCES
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-built-package
+          path: |
+            ${{steps.build.outputs.rpm_directory_path}}
+            ${{steps.build.outputs.source_rpm_directory_path}}
