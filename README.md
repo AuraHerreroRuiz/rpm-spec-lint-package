@@ -12,7 +12,7 @@ There is currently no support for other versions, if there is a need feel free t
 
 ## Usage
 
-You can look at [.github/workflows/test.yaml] for example usage.
+You can look at [.github/workflows/test.yaml](https://github.com/AuraHerreroRuiz/rpm-spec-lint-package/blob/main/.github/workflows/test.yaml) for example usage.
 
 ### Exit codes
 |Code|Error Name|Cause|
